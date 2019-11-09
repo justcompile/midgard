@@ -41,10 +41,3 @@ func main() {
 	<-done
 	log.Info("Farewell")
 }
-
-// checkErrorAndExit wraps log.Fatal in a conditional to clean up code files
-func checkErrorAndExit(msg string, err error) {
-	if err != nil {
-		log.Fatalf(msg, err)
-	}
-}

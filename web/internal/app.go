@@ -11,19 +11,23 @@ type App struct {
 
 func (a *App) Start() {
 	log.Info("Starting Midgard...")
-	a.webServer.Listen()
-	a.workerServer.Listen()
+	if err := a.webServer.Listen(); err != nil {
+		log.Errorf("%v", err)
+	}
+
+	if err := a.workerServer.Listen(); err != nil {
+		log.Errorf("%v", err)
+	}
 }
 
 func (a *App) Shutdown() error {
-	err := a.webServer.Shutdown()
+	var err error
 
-	if err != nil {
+	if err = a.webServer.Shutdown(); err != nil {
 		log.Error(err)
 	}
 
-	err = a.workerServer.Shutdown()
-	if err != nil {
+	if err = a.workerServer.Shutdown(); err != nil {
 		log.Error(err)
 	}
 
