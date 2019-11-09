@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package workercomms;
+
+service MidgardWorker {
+    rpc Connect(Worker) returns (Connection) {}
+    rpc Disconnect(Worker) returns (Connection) {}
+}
+
+message Worker {
+    string name = 1;
+}
+
+message Connection {
+    int32 state = 1;
+}

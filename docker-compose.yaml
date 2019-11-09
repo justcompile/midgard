@@ -1,0 +1,61 @@
+version: "3.4"
+
+services:
+  pg:
+    image: postgres:11-alpine
+    volumes: 
+      - ./dbdir:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment: 
+      - "POSTGRES_USER=midgard"
+      - "POSTGRES_PASSWORD=password"
+      - "POSTGRES_DB=midgard"
+    healthcheck:
+      test: psql -h localhost -U midgard -d midgard -c ''
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  api:
+    depends_on: 
+      - pg
+    build: .
+    volumes:
+      - "./:/go/src/github.com/justcompile/midgard"
+    command:
+      - go
+      - run
+      - main.go
+    ports:
+      - 8000:8000
+      - 10000:10000
+    environment: 
+      - "DATABASE_URL=postgresql://midgard:password@pg/midgard?sslmode=disable"
+    restart: on-failure
+
+  ui:
+    depends_on: 
+      - api
+    image: nginx
+    ports:
+      - 8888:80
+    volumes: 
+      - "./web/index.html:/usr/share/nginx/html/index.html:ro"
+    restart: on-failure
+
+  worker:
+    depends_on: 
+      - api
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      - "./:/go/src/github.com/justcompile/midgard"
+    command:
+      - go
+      - run
+      - main.go
+      - -server_addr
+      - api:10000
+    restart: on-failure
