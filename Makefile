@@ -11,8 +11,8 @@ build:
 .PHONY: lint
 lint:
 	@echo "Linting"
-	docker run --rm -it justcompile/migard-web bash ../scripts/lint.sh
-	docker run --rm -it justcompile/migard-worker bash ../scripts/lint.sh
+	docker run --rm -i justcompile/migard-web bash ../scripts/lint.sh
+	docker run --rm -i justcompile/migard-worker bash ../scripts/lint.sh
 
 # .PHONY: test
 # test:
