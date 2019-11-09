@@ -14,6 +14,8 @@ FROM deps as common
 
 WORKDIR $GOPATH/src/github.com/justcompile/midgard/common
 
+COPY ./scripts $GOPATH/src/github.com/justcompile/midgard/scripts
+
 ADD ./common/go.mod $GOPATH/src/github.com/justcompile/midgard/common/go.mod
 ADD ./common/go.sum $GOPATH/src/github.com/justcompile/midgard/common/go.sum
 
