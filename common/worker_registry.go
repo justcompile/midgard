@@ -9,21 +9,29 @@ import (
 	pb "github.com/justcompile/midgard/common/workercomms"
 )
 
+type ConnectedWorker struct {
+	Worker pb.Worker              `json:"worker"`
+	Type   events.WorkerEventType `json:"type"`
+}
+
 type workerRegistry struct {
 	workers map[string]*pb.Worker
 	mu      sync.Mutex
 }
 
-func (s *workerRegistry) GetConnectedWorkers() []pb.Worker {
+func (s *workerRegistry) GetConnectedWorkers() []ConnectedWorker {
 	s.mu.Lock()
-	results := make([]pb.Worker, len(s.workers))
+	results := make([]ConnectedWorker, len(s.workers))
 	i := 0
 
 	for _, worker := range s.workers {
 		var newWorker pb.Worker
 
 		copier.Copy(&newWorker, worker)
-		results[i] = newWorker
+		results[i] = ConnectedWorker{
+			Worker: newWorker,
+			Type:   events.WorkerEventTypeConnected,
+		}
 
 		i++
 	}
@@ -60,7 +68,7 @@ func (s *workerRegistry) Disconnect(ctx context.Context, worker *pb.Worker) (*pb
 	return &pb.Connection{State: 200}, nil
 }
 
-// WorkerRegistry ...
+// WorkerRegistry contains the workers currently connected to the server
 var WorkerRegistry *workerRegistry
 
 func init() {

@@ -19,7 +19,7 @@ var (
 // Project defines the database model for a `project` which is the root level model for Midgard
 type Project struct {
 	Id        int64     `json:"id"`
-	Name      string    `json:"name"`
+	Name      string    `json:"name" pg:",unique"`
 	CreatedAt time.Time `json:"created" sql:"default:now()"`
 	UpdatedAt time.Time `json:"updated"`
 }
@@ -36,21 +36,16 @@ func (p *Project) BeforeUpdate(ctx context.Context) (context.Context, error) {
 	return ctx, nil
 }
 
-func (p *Project) Indexes() []string {
-	return []string{
-		`CREATE UNIQUE INDEX IF NOT EXISTS name_unique_idx on ?TableName (LOWER(name))`,
-	}
-}
-
-// Build ...
+// Build defines a model which contains an instance of a project build
 type Build struct {
-	Id       int64       `json:"id"`
-	BuildId  int64       `json:"build_id"`
-	Project  *Project    `json:"project"`
-	Created  time.Time   `json:"created"`
-	Started  time.Time   `json:"started"`
-	Finished *time.Time  `json:"finished"`
-	Status   BuildStatus `json:"status"`
+	Id        int64       `json:"id"`
+	BuildId   int64       `json:"build_id"`
+	ProjectId int64       `json:"-"`
+	Project   *Project    `json:"project" pg:"fk:project_id"`
+	Created   time.Time   `json:"created"`
+	Started   time.Time   `json:"started"`
+	Finished  *time.Time  `json:"finished"`
+	Status    BuildStatus `json:"status"`
 }
 
 // BeforeInsert is a Model hook which is invoked before a Build is saved

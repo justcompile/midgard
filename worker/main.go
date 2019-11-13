@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	pb "github.com/justcompile/midgard/common/workercomms"
@@ -47,15 +49,33 @@ func main() {
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
-	defer conn.Close()
+
+	signals := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+
 	client := pb.NewMidgardWorkerClient(conn)
 
 	name, _ := os.Hostname()
 
 	connect(client, name)
 
+	go func() {
+		<-signals
+		fmt.Println()
+
+		log.Println("Closing")
+		disconnect(client, name)
+		conn.Close()
+
+		done <- true
+	}()
+
+	defer conn.Close()
+
 	ticker := time.NewTicker(1 * time.Second)
-	done := make(chan bool)
+
 	go func() {
 		for {
 			select {
@@ -70,5 +90,4 @@ func main() {
 	time.Sleep(30 * time.Second)
 	ticker.Stop()
 	done <- true
-	disconnect(client, name)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/go-pg/pg/v9"
 )
 
+// BuildQueue is a service which workers can use to pull builds to carry out
 type BuildQueue struct {
 	db *pg.DB
 }

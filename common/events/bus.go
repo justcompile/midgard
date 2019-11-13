@@ -30,7 +30,7 @@ func send(channelName string, data interface{}) error {
 	return err
 }
 
-// Subscribe does a thing
+// Subscribe allows callers to receive events from 1 or more channels
 func Subscribe(channels ...string) *pg.Listener {
 	return eventsBus.db.Listen(channels...)
 }
